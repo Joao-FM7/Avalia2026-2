@@ -132,13 +132,22 @@ node tests/api.integration.mjs        # contrato HTTP (com o pages dev rodando)
 2. **Discord Developer Portal** → New Application → OAuth2:
    - copie `Client ID` e `Client Secret`;
    - adicione o redirect `https://pomodoro-p26-2a.pages.dev/api/auth/discord/callback`.
-3. **Cloudflare Pages** → *Create → Pages → Connect to Git*:
-   - repositório: fork de `frankalcantara/Avalia2026-2`;
-   - **Root directory:** `P26-2A-63CE-527A-2990-8D25`
-   - **Build command:** *(vazio)*
-   - **Build output directory:** `public`
-4. **Settings → Environment variables:** `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `SESSION_SECRET` (32+ bytes aleatórios).
-5. **Settings → Functions → D1 database bindings:** variável `DB` → banco criado no passo 1.
+3. **Cloudflare Pages** (projeto `pomodoro-p26-2a`, deploy direto pelo Wrangler):
+   ```powershell
+   npx.cmd wrangler pages project create pomodoro-p26-2a --production-branch main
+   npx.cmd wrangler pages deploy public --project-name pomodoro-p26-2a --branch main
+   ```
+   O `wrangler.jsonc` já aponta `pages_build_output_dir` para `public` e declara o binding `DB` do D1;
+   não há build step.
+4. **Segredos do projeto** (nunca versionados):
+   ```powershell
+   npx.cmd wrangler pages secret put DISCORD_CLIENT_ID     --project-name pomodoro-p26-2a
+   npx.cmd wrangler pages secret put DISCORD_CLIENT_SECRET --project-name pomodoro-p26-2a
+   npx.cmd wrangler pages secret put SESSION_SECRET        --project-name pomodoro-p26-2a
+   ```
+   Depois de qualquer segredo novo, refaça o `pages deploy` para o deployment passar a enxergá-lo.
+5. **Resultado:** <https://pomodoro-p26-2a.pages.dev> — login real com Discord, D1 em produção e
+   redirect `https://pomodoro-p26-2a.pages.dev/api/auth/discord/callback` registrado no portal.
 
 `SESSION_SECRET` nunca é versionado: se faltar, toda rota autenticada responde `401` (falha fechada — ninguém entra)
 em vez de aceitar sessão sem assinatura.
