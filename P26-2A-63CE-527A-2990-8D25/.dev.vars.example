@@ -1,0 +1,4 @@
+# Copie para .dev.vars (não versionado) apenas para desenvolvimento local.
+DISCORD_CLIENT_ID=000000000000000000
+DISCORD_CLIENT_SECRET=troque-me
+SESSION_SECRET=troque-por-um-segredo-aleatorio-de-32-bytes

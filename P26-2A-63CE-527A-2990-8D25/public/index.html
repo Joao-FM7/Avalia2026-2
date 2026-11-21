@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Temporizador Pomodoro com métricas de estudo — Projeto #13">
+  <meta name="theme-color" content="#0b1120">
+  <title>Pomodoro · Métricas de Estudo</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='44' fill='%2322d3ee'/%3E%3C/svg%3E">
+</head>
+<body>
+  <a class="skip-link" href="#timer">Ir para o temporizador</a>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">◷</span>
+      <div class="brand-text">
+        <strong>Pomodoro</strong>
+        <span>Métricas de estudo</span>
+      </div>
+    </div>
+
+    <div class="auth" id="authArea">
+      <a class="btn btn-discord" id="loginLink" href="/api/auth/discord">Entrar com Discord</a>
+      <div class="profile" id="profile" hidden>
+        <img id="avatar" class="avatar" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="34" height="34">
+        <span class="profile-name" id="username"></span>
+        <button class="btn btn-ghost btn-small" id="logoutBtn" type="button">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="card timer-card" id="timer" aria-labelledby="timerTitle">
+      <div class="card-head">
+        <h1 id="timerTitle">Ciclo de foco</h1>
+        <span class="phase-badge" id="phaseBadge" data-phase="focus">Foco</span>
+      </div>
+
+      <div class="ring">
+        <svg viewBox="0 0 220 220" aria-hidden="true" focusable="false">
+          <circle class="ring-track" cx="110" cy="110" r="98"></circle>
+          <circle class="ring-progress" id="ringProgress" cx="110" cy="110" r="98"></circle>
+        </svg>
+        <div class="ring-center">
+          <output class="clock" id="clock" role="timer" aria-live="off">25:00</output>
+          <span class="clock-sub" id="clockSub">Foco</span>
+        </div>
+      </div>
+
+      <p class="alert" id="alertBanner" role="status" aria-live="assertive" hidden></p>
+
+      <div class="cycle-dots" id="cycleDots" aria-label="Ciclos de foco concluídos nesta série"></div>
+
+      <div class="controls">
+        <button class="btn btn-primary" id="startBtn" type="button">Iniciar</button>
+        <button class="btn" id="resetBtn" type="button">Reiniciar</button>
+        <button class="btn btn-ghost" id="skipBtn" type="button">Pular</button>
+      </div>
+
+      <div class="field">
+        <label for="subjectSelect">Disciplina / projeto</label>
+        <div class="field-row">
+          <select id="subjectSelect" required>
+            <option value="">Selecione para registrar o foco</option>
+          </select>
+          <button class="btn btn-ghost btn-small" id="archiveBtn" type="button" title="Arquivar a disciplina selecionada">Arquivar</button>
+        </div>
+      </div>
+
+      <form class="subject-form" id="subjectForm" novalidate>
+        <label class="sr-only" for="subjectName">Nova disciplina</label>
+        <input id="subjectName" name="name" maxlength="40" autocomplete="off" placeholder="Nova disciplina ou projeto">
+        <button class="btn btn-ghost" type="submit">Adicionar</button>
+      </form>
+
+      <details class="settings">
+        <summary>Configurações do ciclo</summary>
+        <div class="settings-grid">
+          <label for="focusMin">Foco (min)
+            <input id="focusMin" type="number" min="1" max="90" step="1" inputmode="numeric">
+          </label>
+          <label for="shortMin">Pausa curta (min)
+            <input id="shortMin" type="number" min="1" max="30" step="1" inputmode="numeric">
+          </label>
+          <label for="longMin">Pausa longa (min)
+            <input id="longMin" type="number" min="1" max="60" step="1" inputmode="numeric">
+          </label>
+          <label for="cyclesInput">Ciclos até pausa longa
+            <input id="cyclesInput" type="number" min="1" max="12" step="1" inputmode="numeric">
+          </label>
+        </div>
+        <label class="switch">
+          <input id="autoStart" type="checkbox">
+          <span>Iniciar o próximo ciclo automaticamente</span>
+        </label>
+      </details>
+
+      <p class="hint" id="loginHint" hidden>Entre com o Discord para registrar os ciclos e ver suas métricas.</p>
+    </section>
+
+    <section class="card stats-card" aria-labelledby="statsTitle">
+      <div class="card-head">
+        <h2 id="statsTitle">Sua semana</h2>
+        <span class="week-label" id="weekLabel"></span>
+      </div>
+
+      <p class="big-number" id="weekTotal">0min</p>
+      <p class="muted" id="weekMeta">Sem ciclos registrados</p>
+
+      <ul class="bars" id="subjectBars" aria-label="Distribuição de esforço por disciplina"></ul>
+      <p class="empty" id="statsEmpty" hidden>Nenhum ciclo nesta semana ainda. Conclua um ciclo de foco para começar.</p>
+
+      <dl class="totals">
+        <div><dt>Hoje</dt><dd id="todayTotal">0min</dd></div>
+        <div><dt>Total geral</dt><dd id="allTimeTotal">0min</dd></div>
+      </dl>
+    </section>
+
+    <section class="card history-card" aria-labelledby="historyTitle">
+      <div class="card-head">
+        <h2 id="historyTitle">Histórico recente</h2>
+        <span class="muted" id="historyCount"></span>
+      </div>
+      <ul class="history" id="historyList"></ul>
+      <p class="empty" id="historyEmpty" hidden>Nenhum ciclo registrado. Seus ciclos concluídos aparecem aqui.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p class="key">P26-2A-63CE-527A-2990-8D25</p>
+    <p>João Fidalgo Marinho · Turma 2A · RA 2026109268</p>
+    <p>Projeto #13 — Temporizador Pomodoro com Métricas de Estudo · Licença MIT</p>
+  </footer>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

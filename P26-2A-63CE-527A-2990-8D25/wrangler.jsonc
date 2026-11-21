@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pomodoro-p26-2a",
+  "compatibility_date": "2026-03-01",
+  "pages_build_output_dir": "./public",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "db-p26-2a-63ce-527a-2990-8d25",
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ]
+}
